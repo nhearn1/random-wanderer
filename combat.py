@@ -75,7 +75,12 @@ def fight(player, enemies, inventory=None):
             for e in alive:
                 if e.hp <= 0:  continue
                 if _hit_success():
-                    edmg = _calc_damage(e.atk, player.defense + player.shield_tier)
+                    total_defense = (
+                        player.defense
+                        + player.armor_tier
+                        + player.shield_tier
+                    )
+                    edmg = _calc_damage(e.atk, total_defense)
                     player.hp = max(0, player.hp - edmg)
                     print(f"The {e.name} hits you for {edmg}.")
                 else:

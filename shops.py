@@ -92,14 +92,11 @@ def _buy_loop(player, inventory, goods, on_purchase=None):
         elif effect == "def+1":
             player.defense += 1
         elif effect == "weapon_tier+1":
-            player.weapon_tier = min(3, player.weapon_tier + 1)
-            player.attack += 1
+         player.weapon_tier = min(3, player.weapon_tier + 1)
         elif effect == "armor_tier+1":
-            player.armor_tier = min(3, player.armor_tier + 1)
-            player.defense += 1
+         player.armor_tier = min(3, player.armor_tier + 1)
         elif effect == "shield_tier+1":
-            player.shield_tier = min(3, player.shield_tier + 1)
-            player.defense += 1
+         player.shield_tier = min(3, player.shield_tier + 1)
 
         if on_purchase:
             on_purchase(name, effect)
@@ -114,9 +111,9 @@ class Town:
 
     def weapon_smith(self):
         goods = [
-            ("Iron Sword (Tier +1)", 35, "weapon_tier+1"),
-            ("Steel Sword (Tier +1)", 70, "weapon_tier+1"),
-            ("Masterwork Sword (Tier +1)", 140, "weapon_tier+1"),
+            ("Iron Sword (Tier 1)", 35, "weapon_tier:1"),
+            ("Steel Sword (Tier 2)", 70, "weapon_tier:2"),
+            ("Masterwork Sword (Tier 3)", 140, "weapon_tier:3"),
         ]
         _buy_loop(self.player, self.inventory, goods)
 

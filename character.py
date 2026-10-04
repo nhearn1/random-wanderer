@@ -37,7 +37,8 @@ class Character:
         print(f"Name: {self.name}  |  Role: {role_str}{sub_str}")
         print(f"Level: {self.level}  XP: {self.xp}/{xp_needed}")
         print(f"HP: {self.hp}/{self.max_hp}")
-        print(f"ATK: {self.attack}  DEF: {self.defense}")
+        effective_defense = self.defense + self.armor_tier + self.shield_tier
+        print(f"ATK: {self.attack}  DEF: {self.defense} (Effective: {effective_defense})")
         print(f"Gold: {self.gold}")
         print(f"Tiers: Weapon {self.weapon_tier} | Armor {self.armor_tier} | Shield {self.shield_tier}")
         print(f"Story Stage: {self.story_stage}  Main Story: {'Unlocked' if self.main_story_unlocked else 'Locked'}")

@@ -1,0 +1,79 @@
+
+# character.py
+class Character:
+    def __init__(self, name):
+        self.name = name
+
+        # Progression
+        self.role = "Wanderer"
+        self.class_selected = False
+        self.subclass = None
+        self.subclass_selected = False
+
+        # Story & feature locks
+        self.story_stage = 0          # drives story act progression
+        self.main_story_unlocked = False  # set to True by Pub Owner at Lv 5+
+        self.ending_unlocked = False
+        self.ng_plus = False
+
+        # Core stats
+        self.level = 1
+        self.hp = 20
+        self.max_hp = 20
+        self.gold = 50
+        self.xp = 0
+        self.attack = 4
+        self.defense = 2
+
+        # Equipment tiers
+        self.weapon_tier = 0
+        self.armor_tier = 0
+        self.shield_tier = 0
+
+    def show_stats(self):
+        role_str = self.role if self.role else "Wanderer"
+        sub_str = f" / {self.subclass}" if self.subclass else ""
+        xp_needed = self.level * 15
+        print(f"Name: {self.name}  |  Role: {role_str}{sub_str}")
+        print(f"Level: {self.level}  XP: {self.xp}/{xp_needed}")
+        print(f"HP: {self.hp}/{self.max_hp}")
+        print(f"ATK: {self.attack}  DEF: {self.defense}")
+        print(f"Gold: {self.gold}")
+        print(f"Tiers: Weapon {self.weapon_tier} | Armor {self.armor_tier} | Shield {self.shield_tier}")
+        print(f"Story Stage: {self.story_stage}  Main Story: {'Unlocked' if self.main_story_unlocked else 'Locked'}")
+
+    def gain_xp(self, amount):
+        self.xp += amount
+        while self.xp >= self.level * 15:
+            self.xp -= self.level * 15
+            self.level += 1
+            self.max_hp += 5
+            self.hp = self.max_hp
+            self.attack += 1
+            self.defense += 1
+            if self.class_selected:
+                if self.role == "Warrior":
+                    self.defense += 1
+                elif self.role == "Mage":
+                    self.attack += 1
+                elif self.role == "Rogue":
+                    self.attack += 1
+            print(f"*** {self.name} leveled up to {self.level}! ***")
+
+        # Class unlocks (keep your existing implementations if different)
+        if self.level >= 5 and not self.class_selected and self.role == "Wanderer":
+            self.choose_advanced_class()
+        if self.level >= 20 and self.class_selected and not self.subclass_selected:
+            self.choose_subclass()
+
+    # Stubs so this file is drop-in even if your project has fuller versions.
+    def choose_advanced_class(self):
+        print("(class selection occurs here in your full build)")
+        self.class_selected = True
+        self.role = "Warrior"
+        self.hp = self.max_hp
+
+    def choose_subclass(self):
+        print("(subclass selection occurs here in your full build)")
+        self.subclass_selected = True
+        self.subclass = "Veteran"

@@ -4,13 +4,13 @@
 REGIONS = {
     "woods":     {"desc": "Tall trees and dappled light. You hear distant chittering.", "story_stage_req": 0,
                   "monsters": ["goblin", "giant spider", "bear", "bat"]},
-    "beach":     {"desc": "Waves crash against the shore; gulls circle overhead.", "story_stage_req": 1,
+    "beach":     {"desc": "Waves crash against the shore; gulls circle overhead.", "story_stage_req": 2,
                   "monsters": ["bandit", "bat", "goblin"]},
-    "plains":    {"desc": "Sweeping grasslands and scattered stones.", "story_stage_req": 2,
+    "plains":    {"desc": "Sweeping grasslands and scattered stones.", "story_stage_req": 3,
                   "monsters": ["skeleton", "orc", "bandit"]},
-    "mountains": {"desc": "Thin air, rocky paths, and looming peaks.", "story_stage_req": 3,
+    "mountains": {"desc": "Thin air, rocky paths, and looming peaks.", "story_stage_req": 4,
                   "monsters": ["dark mage", "orc", "bear"]},
-    "citadel":   {"desc": "The Shadow Lord's fortress looms beyond a torn sky.", "story_stage_req": 4,
+    "citadel":   {"desc": "The Shadow Lord's fortress looms beyond a torn sky.", "story_stage_req": 5,
                   "monsters": ["dark mage", "orc", "giant spider", "skeleton", "bandit", "shadow lord"]},
 }
 

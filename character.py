@@ -41,19 +41,45 @@ class Character:
         self.shield_tier = 0
 
     def show_stats(self):
-        role_str = self.role if self.role else "Wanderer"
-        sub_str = f" / {self.subclass}" if self.subclass else ""
-        xp_needed = self.level * 15
-        print(f"Name: {self.name}  |  Role: {role_str}{sub_str}")
-        print(f"Level: {self.level}  XP: {self.xp}/{xp_needed}")
+        effective_defense = (
+            self.defense
+            + self.armor_tier
+            + self.shield_tier
+        )
+
+        # Warrior Lv7 passive:
+        # Improved Fighting Stance
+        if self.role == "Warrior" and self.level >= 7:
+            effective_defense += 1
+
+        print(f"\nName: {self.name} | Role: {self.role}")
+        print(f"Level: {self.level}  XP: {self.xp}/{self.xp_to_next()}")
         print(f"HP: {self.hp}/{self.max_hp}")
-        effective_defense = self.defense + self.armor_tier + self.shield_tier
+
         if self.resource_type:
-            print(f"{self.resource_type}: {self.resource}/{self.max_resource}")
-        print(f"ATK: {self.attack}  DEF: {self.defense} (Effective: {effective_defense})")
+            print(
+                f"{self.resource_type}: "
+                f"{self.resource}/{self.max_resource}"
+            )
+
+        print(
+            f"ATK: {self.attack}  "
+            f"DEF: {self.defense} "
+            f"(Effective: {effective_defense})"
+        )
+
         print(f"Gold: {self.gold}")
-        print(f"Tiers: Weapon {self.weapon_tier} | Armor {self.armor_tier} | Shield {self.shield_tier}")
-        print(f"Story Stage: {self.story_stage}  Main Story: {'Unlocked' if self.main_story_unlocked else 'Locked'}")
+
+        print(
+            f"Tiers: Weapon {self.weapon_tier} | "
+            f"Armor {self.armor_tier} | "
+            f"Shield {self.shield_tier}"
+        )
+
+        print(
+            f"Story Stage: {self.story_stage} | "
+            f"Ending Unlocked: {self.ending_unlocked}"
+        )
 
     def gain_xp(self, amount):
         self.xp += amount

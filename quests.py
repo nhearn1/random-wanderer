@@ -47,11 +47,29 @@ class QuestBoard:
         print("*** Main Story Unlocked! Visit the Guild Hall in town. ***")
 
     def rest(self):
+        """Fully restore HP and class resources for 10 gold."""
+
         if self.player.gold < 10:
-            print("You don't have enough gold to rest.");  return
+            print("You don't have enough gold to rest.")
+            return
+
         self.player.gold -= 10
+
+        # Restore HP
         self.player.hp = self.player.max_hp
-        print("You rent a room and rest. Fully healed!")
+
+        # Restore Mana/Energy after class selection
+        if self.player.resource_type:
+            self.player.resource = self.player.max_resource
+
+        print("You rent a room and rest.")
+        print("HP fully restored!")
+
+        if self.player.resource_type:
+            print(
+                f"{self.player.resource_type} "
+                "fully restored!"
+            )
 
     def _quest_is_accessible(self, q):
         for item in q["need"]:

@@ -30,6 +30,11 @@ class Character:
         self.resource = 0
         self.max_resource = 0
 
+        # Ability/combat state
+        self.cooldowns = {}
+        self.guard_active = False
+        self.dodge_bonus = 0.0
+
         # Equipment tiers
         self.weapon_tier = 0
         self.armor_tier = 0

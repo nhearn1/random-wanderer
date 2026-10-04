@@ -1,6 +1,7 @@
 
 # combat.py
 import random
+from abilities import ABILITIES
 
 def _hit_success(base=0.80, modifier=0.0):
     return random.random() < max(0.05, min(0.98, base + modifier))
@@ -20,6 +21,49 @@ def _use_item(player, inventory):
         print("You feel refreshed! HP fully restored.")
         return True
     return False
+
+def _ability_menu(player):
+    """Return the selected ability key, or None if cancelled."""
+
+    class_abilities = ABILITIES.get(player.role, {})
+
+    available = [
+        (key, ability)
+        for key, ability in class_abilities.items()
+        if player.level >= ability["level"]
+    ]
+
+    if not available:
+        print("You have no abilities available.")
+        return None
+
+    print(f"\n-- {player.role} Abilities --")
+    print(f"{player.resource_type}: {player.resource}/{player.max_resource}")
+
+    for i, (key, ability) in enumerate(available, start=1):
+        print(
+            f"{i}) {ability['name']} "
+            f"[{ability['cost']} {player.resource_type}]"
+        )
+        print(f"   {ability['description']}")
+
+    print("0) Back")
+
+    choice = input("> ").strip()
+
+    if choice == "0":
+        return None
+
+    try:
+        idx = int(choice) - 1
+
+        if 0 <= idx < len(available):
+            return available[idx][0]
+    except ValueError:
+        pass
+
+    print("Invalid choice.")
+    return None
 
 def fight(player, enemies, inventory=None):
     enemies = enemies if isinstance(enemies, list) else [enemies]
@@ -62,7 +106,9 @@ def fight(player, enemies, inventory=None):
                 else:
                     print("Your attack missed!");  acted = True
         elif move.startswith('b'):
-            print("(Abilities menu placeholder)")
+         ability_key = _ability_menu(player)
+         if ability_key:
+            print(f"Selected ability: {ability_key}")
         elif move.startswith('r'):
             if random.random() < 0.5:
                 print("You fled successfully.");  return "fled"

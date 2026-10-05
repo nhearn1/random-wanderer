@@ -8,6 +8,7 @@ from shops import Town
 from quests import QuestBoard
 from story import Story
 from crafting import Workshop
+from devtools import DeveloperTools
 
 def print_header(title):
     print("\n" + "="*60);  print(title);  print("="*60)
@@ -22,6 +23,7 @@ def main():
     quests = QuestBoard(player, inventory)
     story = Story(player, inventory, explorer)
     workshop = Workshop(player, inventory)
+    devtools = DeveloperTools(player, inventory)
 
     while True:
         print_header("Main Menu")
@@ -43,6 +45,9 @@ def main():
             town_loop(town, quests, explorer, story, workshop, player)
         elif choice == "5":
             print("Goodbye!");  sys.exit(0)
+        elif choice.lower() == "dev":
+            devtools.menu()
+            continue    
         else:
             print("Invalid choice.")
 

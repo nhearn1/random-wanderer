@@ -1,7 +1,8 @@
 import os
 import sys
-
 import pygame
+
+from character import Character
 from ui.components import Button
 from ui.character_creation import character_creation_screen
 
@@ -252,14 +253,28 @@ def main():
 
             elif result == "start":
 
+                player = Character(
+                name=character_data["name"],
+                gender=character_data["gender"],
+                appearance=character_data["appearance"],
+                gui_mode=True,
+            )
+
+                print("\n=== GUI CHARACTER CREATED ===")
+                print(f"Name: {player.name}")
+                print(f"Gender: {player.gender}")
+                print(f"Appearance: {player.appearance}")
+                print(f"Role: {player.role}")
+                print(f"Level: {player.level}")
+                print(f"HP: {player.hp}/{player.max_hp}")
+                print(f"Gold: {player.gold}")
+                print(f"GUI Mode: {player.gui_mode}")
                 print(
-                    "Character created:",
-                    character_data,
+                    "Class Selection Pending: "
+                    f"{player.class_selection_pending}"
                 )
 
-                # Temporary:
-                # Until the GUI game screen is built,
-                # return to the title screen.
+                # Temporary until the Town GUI exists.
                 current_screen = "title"    
 
             elif result == "quit":

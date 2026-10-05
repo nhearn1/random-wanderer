@@ -2,8 +2,28 @@
 
 
 class Character:
-    def __init__(self, name):
+    def __init__(
+        self,
+        name,
+        gender="male",
+        appearance=1,
+        gui_mode=False
+    ):
         self.name = name
+
+        # ========================================================
+        # APPEARANCE
+        # ========================================================
+
+        self.gender = gender
+        self.appearance = appearance
+
+        # ========================================================
+        # INTERFACE STATE
+        # ========================================================
+
+        self.gui_mode = gui_mode
+        self.class_selection_pending = False
 
         # ========================================================
         # PROGRESSION
@@ -172,7 +192,10 @@ class Character:
             and not self.class_selected
             and self.role == "Wanderer"
         ):
-            self.choose_advanced_class()
+            if self.gui_mode:
+                self.class_selection_pending = True
+            else:
+                self.choose_advanced_class()
 
         # Subclass selection
         if (

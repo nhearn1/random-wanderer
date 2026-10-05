@@ -1,10 +1,13 @@
 import os
 import sys
+
 import pygame
 
 from character import Character
 from ui.components import Button
 from ui.character_creation import character_creation_screen
+from ui.town import town_screen
+from ui.stats import stats_screen
 
 
 # ================================================================
@@ -17,7 +20,9 @@ FPS = 60
 
 TITLE = "Random Wanderer"
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(
+    os.path.abspath(__file__)
+)
 
 TITLE_BACKGROUND_PATH = os.path.join(
     BASE_DIR,
@@ -50,9 +55,11 @@ OVERLAY = (0, 0, 0, 80)
 def load_title_background():
     """Load and scale the title artwork."""
 
-    if not os.path.exists(TITLE_BACKGROUND_PATH):
+    if not os.path.exists(
+        TITLE_BACKGROUND_PATH
+    ):
         raise FileNotFoundError(
-            f"Title background not found:\n"
+            "Title background not found:\n"
             f"{TITLE_BACKGROUND_PATH}"
         )
 
@@ -213,13 +220,28 @@ def main():
         23,
     )
 
-    # Load assets once at startup.
-    title_background = load_title_background()
+    # Load title artwork once at startup.
+    title_background = (
+        load_title_background()
+    )
+
+    # ------------------------------------------------------------
+    # GAME STATE
+    # ------------------------------------------------------------
 
     current_screen = "title"
     running = True
+    player = None
+
+    # ------------------------------------------------------------
+    # MAIN APPLICATION LOOP
+    # ------------------------------------------------------------
 
     while running:
+
+        # ========================================================
+        # TITLE
+        # ========================================================
 
         if current_screen == "title":
 
@@ -232,12 +254,20 @@ def main():
             )
 
             if result == "start":
-                current_screen = "character_creation"
+                current_screen = (
+                    "character_creation"
+                )
 
             elif result == "quit":
                 running = False
 
-        elif current_screen == "character_creation":
+        # ========================================================
+        # CHARACTER CREATION
+        # ========================================================
+
+        elif current_screen == (
+            "character_creation"
+        ):
 
             result, character_data = (
                 character_creation_screen(
@@ -254,31 +284,153 @@ def main():
             elif result == "start":
 
                 player = Character(
-                name=character_data["name"],
-                gender=character_data["gender"],
-                appearance=character_data["appearance"],
-                gui_mode=True,
-            )
+                    name=character_data[
+                        "name"
+                    ],
+                    gender=character_data[
+                        "gender"
+                    ],
+                    appearance=character_data[
+                        "appearance"
+                    ],
+                    gui_mode=True,
+                )
 
-                print("\n=== GUI CHARACTER CREATED ===")
-                print(f"Name: {player.name}")
-                print(f"Gender: {player.gender}")
-                print(f"Appearance: {player.appearance}")
-                print(f"Role: {player.role}")
-                print(f"Level: {player.level}")
-                print(f"HP: {player.hp}/{player.max_hp}")
-                print(f"Gold: {player.gold}")
-                print(f"GUI Mode: {player.gui_mode}")
+                # ----------------------------------------------
+                # DEVELOPMENT DIAGNOSTICS
+                # ----------------------------------------------
+
+                print(
+                    "\n"
+                    "=== GUI CHARACTER CREATED ==="
+                )
+
+                print(
+                    f"Name: {player.name}"
+                )
+
+                print(
+                    f"Gender: {player.gender}"
+                )
+
+                print(
+                    "Appearance: "
+                    f"{player.appearance}"
+                )
+
+                print(
+                    f"Role: {player.role}"
+                )
+
+                print(
+                    f"Level: {player.level}"
+                )
+
+                print(
+                    "HP: "
+                    f"{player.hp}/"
+                    f"{player.max_hp}"
+                )
+
+                print(
+                    f"Gold: {player.gold}"
+                )
+
+                print(
+                    "GUI Mode: "
+                    f"{player.gui_mode}"
+                )
+
                 print(
                     "Class Selection Pending: "
                     f"{player.class_selection_pending}"
                 )
 
-                # Temporary until the Town GUI exists.
-                current_screen = "title"    
+                # Character creation is complete.
+                # Enter the main town hub.
+                current_screen = "town"
 
             elif result == "quit":
                 running = False
+
+        # ========================================================
+        # TOWN
+        # ========================================================
+
+        elif current_screen == "town":
+
+            # Safety guard. Normally impossible once
+            # character creation has completed.
+            if player is None:
+                current_screen = "title"
+                continue
+
+            result = town_screen(
+                screen,
+                clock,
+                player,
+                menu_font,
+                small_font,
+            )
+
+            if result == "title":
+                current_screen = "title"
+
+            elif result == "quit":
+                running = False
+
+            elif result == "stats":
+                current_screen = "stats"
+
+            else:
+                # Other Town locations have not been
+                # converted into GUI screens yet.
+                print(
+                    "Town destination selected: "
+                    f"{result}"
+                )
+
+        # ========================================================
+        # STATS
+        # ========================================================
+
+        elif current_screen == "stats":
+
+            # Same safety guard used by Town.
+            if player is None:
+                current_screen = "title"
+                continue
+
+            result = stats_screen(
+                screen,
+                clock,
+                player,
+                menu_font,
+                small_font,
+            )
+
+            if result == "town":
+                current_screen = "town"
+
+            elif result == "quit":
+                running = False
+
+        # ========================================================
+        # UNKNOWN STATE SAFETY
+        # ========================================================
+
+        else:
+
+            print(
+                "Unknown screen state: "
+                f"{current_screen}"
+            )
+
+            current_screen = "title"
+
+    # ============================================================
+    # SHUTDOWN
+    # ============================================================
 
     pygame.quit()
     sys.exit()

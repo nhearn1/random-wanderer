@@ -1,26 +1,29 @@
-"""Graphical character stats screen for Random Wanderer."""
+"""Graphical character statistics screen for Random Wanderer."""
 
 import pygame
 
 from ui.components import Button
 
 
-# ============================================================
+# ================================================================
 # COLORS
-# ============================================================
+# ================================================================
 
 BACKGROUND = (12, 20, 32)
 PANEL = (20, 35, 55)
+
 GOLD = (218, 164, 70)
 WHITE = (245, 239, 218)
 MUTED = (180, 180, 170)
 
+DIVIDER = (110, 95, 70)
 
-# ============================================================
+
+# ================================================================
 # HELPERS
-# ============================================================
+# ================================================================
 
-def draw_stat_line(
+def draw_stat_row(
     screen,
     label,
     value,
@@ -28,7 +31,7 @@ def draw_stat_line(
     y,
     font,
 ):
-    """Draw one label/value stat line."""
+    """Draw a label and value pair."""
 
     label_surface = font.render(
         label,
@@ -49,33 +52,13 @@ def draw_stat_line(
 
     screen.blit(
         value_surface,
-        (x + 190, y),
+        (x + 220, y),
     )
 
 
-def get_effective_defense(player):
-    """Calculate defense exactly as the character stats display does."""
-
-    effective_defense = (
-        player.defense
-        + player.armor_tier
-        + player.shield_tier
-    )
-
-    # Warrior Lv7 passive:
-    # Improved Fighting Stance
-    if (
-        player.role == "Warrior"
-        and player.level >= 7
-    ):
-        effective_defense += 1
-
-    return effective_defense
-
-
-# ============================================================
+# ================================================================
 # STATS SCREEN
-# ============================================================
+# ================================================================
 
 def stats_screen(
     screen,
@@ -83,25 +66,46 @@ def stats_screen(
     player,
     font,
     small_font,
+    return_screen="town",
 ):
     """Display the player's character statistics."""
 
-    screen_width, screen_height = screen.get_size()
+    screen_width, screen_height = (
+        screen.get_size()
+    )
+
+    panel_width = min(
+        1000,
+        screen_width - 100,
+    )
+
+    panel_height = min(
+        650,
+        screen_height - 60,
+    )
+
+    panel_x = (
+        screen_width - panel_width
+    ) // 2
+
+    panel_y = (
+        screen_height - panel_height
+    ) // 2
 
     back_button = Button(
         "BACK",
-        40,
-        screen_height - 85,
+        panel_x + 25,
+        panel_y + panel_height - 65,
         180,
-        50,
+        45,
         small_font,
     )
 
     while True:
 
-        # ====================================================
+        # ========================================================
         # EVENTS
-        # ====================================================
+        # ========================================================
 
         for event in pygame.event.get():
 
@@ -111,36 +115,20 @@ def stats_screen(
             if event.type == pygame.KEYDOWN:
 
                 if event.key == pygame.K_ESCAPE:
-                    return "town"
+                    return return_screen
 
             if back_button.clicked(event):
-                return "town"
+                return return_screen
 
-        # ====================================================
+        # ========================================================
         # BACKGROUND
-        # ====================================================
+        # ========================================================
 
         screen.fill(BACKGROUND)
 
-        # ====================================================
+        # ========================================================
         # MAIN PANEL
-        # ====================================================
-
-        panel_width = min(
-            900,
-            screen_width - 100,
-        )
-
-        panel_height = min(
-            650,
-            screen_height - 120,
-        )
-
-        panel_x = (
-            screen_width - panel_width
-        ) // 2
-
-        panel_y = 45
+        # ========================================================
 
         panel_rect = pygame.Rect(
             panel_x,
@@ -162,12 +150,12 @@ def stats_screen(
             4,
         )
 
-        # ====================================================
+        # ========================================================
         # HEADER
-        # ====================================================
+        # ========================================================
 
         title = font.render(
-            player.name.upper(),
+            "CHARACTER STATS",
             True,
             GOLD,
         )
@@ -184,16 +172,35 @@ def stats_screen(
             title_rect,
         )
 
-        role_text = small_font.render(
-            f"Level {player.level} {player.role}",
+        name_text = font.render(
+            player.name,
             True,
             WHITE,
+        )
+
+        name_rect = name_text.get_rect(
+            center=(
+                screen_width // 2,
+                panel_y + 90,
+            )
+        )
+
+        screen.blit(
+            name_text,
+            name_rect,
+        )
+
+        role_text = small_font.render(
+            f"Level {player.level} "
+            f"{player.role}",
+            True,
+            MUTED,
         )
 
         role_rect = role_text.get_rect(
             center=(
                 screen_width // 2,
-                panel_y + 85,
+                panel_y + 125,
             )
         )
 
@@ -202,173 +209,201 @@ def stats_screen(
             role_rect,
         )
 
-        # ====================================================
-        # COLUMN POSITIONS
-        # ====================================================
+        pygame.draw.line(
+            screen,
+            DIVIDER,
+            (
+                panel_x + 50,
+                panel_y + 155,
+            ),
+            (
+                panel_x
+                + panel_width
+                - 50,
+                panel_y + 155,
+            ),
+            2,
+        )
 
-        left_x = panel_x + 65
-        right_x = panel_x + panel_width // 2 + 35
-
-        start_y = panel_y + 145
-        spacing = 48
-
-        # ====================================================
+        # ========================================================
         # LEFT COLUMN
-        # ====================================================
+        # ========================================================
 
-        draw_stat_line(
+        left_x = panel_x + 90
+        left_y = panel_y + 190
+
+        xp_needed = getattr(
+            player,
+            "xp_to_next",
+            None,
+        )
+
+        if callable(xp_needed):
+            xp_needed = xp_needed()
+
+        if xp_needed is None:
+            xp_needed = getattr(
+                player,
+                "xp_needed",
+                "?",
+            )
+
+        draw_stat_row(
             screen,
             "LEVEL",
             player.level,
             left_x,
-            start_y,
+            left_y,
             small_font,
         )
 
-        draw_stat_line(
+        draw_stat_row(
             screen,
             "XP",
-            f"{player.xp}/{player.xp_to_next()}",
+            f"{player.xp}/{xp_needed}",
             left_x,
-            start_y + spacing,
+            left_y + 45,
             small_font,
         )
 
-        draw_stat_line(
+        draw_stat_row(
             screen,
             "HP",
             f"{player.hp}/{player.max_hp}",
             left_x,
-            start_y + spacing * 2,
+            left_y + 90,
             small_font,
         )
 
-        if player.resource_type:
-
-            draw_stat_line(
-                screen,
-                player.resource_type.upper(),
-                (
-                    f"{player.resource}/"
-                    f"{player.max_resource}"
-                ),
-                left_x,
-                start_y + spacing * 3,
-                small_font,
-            )
-
-        draw_stat_line(
+        draw_stat_row(
             screen,
             "GOLD",
             player.gold,
             left_x,
-            start_y + spacing * 4,
+            left_y + 135,
             small_font,
         )
 
-        # ====================================================
-        # RIGHT COLUMN
-        # ====================================================
-
-        effective_defense = get_effective_defense(
-            player
-        )
-
-        draw_stat_line(
+        draw_stat_row(
             screen,
             "ATTACK",
             player.attack,
-            right_x,
-            start_y,
+            left_x,
+            left_y + 180,
             small_font,
         )
 
-        draw_stat_line(
+        draw_stat_row(
             screen,
             "DEFENSE",
             player.defense,
-            right_x,
-            start_y + spacing,
+            left_x,
+            left_y + 225,
             small_font,
         )
 
-        draw_stat_line(
+        effective_defense = (
+            player.defense
+            + player.armor_tier
+            + player.shield_tier
+        )
+
+        draw_stat_row(
             screen,
             "EFFECTIVE DEF",
             effective_defense,
-            right_x,
-            start_y + spacing * 2,
+            left_x,
+            left_y + 270,
             small_font,
         )
 
-        draw_stat_line(
+        # ========================================================
+        # RIGHT COLUMN
+        # ========================================================
+
+        divider_x = (
+            panel_x + panel_width // 2
+        )
+
+        pygame.draw.line(
+            screen,
+            DIVIDER,
+            (
+                divider_x,
+                panel_y + 180,
+            ),
+            (
+                divider_x,
+                panel_y + 500,
+            ),
+            2,
+        )
+
+        right_x = divider_x + 70
+        right_y = panel_y + 190
+
+        draw_stat_row(
             screen,
             "WEAPON TIER",
             player.weapon_tier,
             right_x,
-            start_y + spacing * 3,
+            right_y,
             small_font,
         )
 
-        draw_stat_line(
+        draw_stat_row(
             screen,
             "ARMOR TIER",
             player.armor_tier,
             right_x,
-            start_y + spacing * 4,
+            right_y + 45,
             small_font,
         )
 
-        draw_stat_line(
+        draw_stat_row(
             screen,
             "SHIELD TIER",
             player.shield_tier,
             right_x,
-            start_y + spacing * 5,
+            right_y + 90,
             small_font,
         )
 
-        # ====================================================
-        # STORY / CLASS INFORMATION
-        # ====================================================
-
-        bottom_y = panel_y + panel_height - 85
-
-        subclass = (
-            player.subclass
-            if player.subclass
-            else "None"
+        subclass = getattr(
+            player,
+            "subclass",
+            None,
         )
 
-        story_text = small_font.render(
-            (
-                f"Subclass: {subclass}   |   "
-                f"Story Stage: {player.story_stage}"
-            ),
+        story_stage = getattr(
+            player,
+            "story_stage",
+            0,
+        )
+
+        extra_text = small_font.render(
+            f"Subclass: {subclass}  |  "
+            f"Story Stage: {story_stage}",
             True,
             MUTED,
         )
 
-        story_rect = story_text.get_rect(
-            center=(
-                screen_width // 2,
-                bottom_y,
-            )
-        )
-
         screen.blit(
-            story_text,
-            story_rect,
+            extra_text,
+            (
+                right_x,
+                right_y + 160,
+            ),
         )
 
-        # ====================================================
-        # BACK BUTTON
-        # ====================================================
+        # ========================================================
+        # FOOTER
+        # ========================================================
 
         back_button.draw(screen)
 
         hint = small_font.render(
-            "ESC: Return to Town",
+            "ESC: Return",
             True,
             MUTED,
         )
@@ -376,8 +411,8 @@ def stats_screen(
         screen.blit(
             hint,
             (
-                240,
-                screen_height - 70,
+                panel_x + 230,
+                panel_y + panel_height - 52,
             ),
         )
 

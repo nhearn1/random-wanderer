@@ -32,6 +32,18 @@ ABILITIES = {
             "cooldown": 0,
             "description": "Passively increases damage and defense.",
         },
+
+        "critical_strike": {
+            "name": "Critical Strike",
+            "level": 10,
+            "type": "active",
+            "cost": 45,
+            "cooldown": 2,
+            "description": (
+                "A devastating melee attack with massive damage "
+                "but reduced accuracy."
+            ),
+        },
     },
 
     # ============================================================
@@ -63,6 +75,15 @@ ABILITIES = {
             "cost": 30,
             "cooldown": 2,
             "description": "Strike one enemy with powerful lightning.",
+        },
+
+        "greater_heal": {
+            "name": "Greater Heal",
+            "level": 10,
+            "type": "active",
+            "cost": 40,
+            "cooldown": 2,
+            "description": "Restore a large portion of your HP.",
         },
     },
 
@@ -97,6 +118,29 @@ ABILITIES = {
             "cost": 35,
             "cooldown": 1,
             "description": "Attack the same enemy twice in rapid succession.",
+        },
+
+        "vanish": {
+            "name": "Vanish",
+            "level": 10,
+            "type": "active",
+            "cost": 30,
+            "cooldown": 3,
+            "description": (
+                "Evade the next enemy attack and empower "
+                "your next Sneak Attack."
+            ),
+        },
+
+        "poison_blade": {
+            "name": "Poison Blade",
+            "level": 10,
+            "type": "active",
+            "cost": 25,
+            "cooldown": 2,
+            "description": (
+                "Strike an enemy and poison it for three turns."
+            ),
         },
     },
 }

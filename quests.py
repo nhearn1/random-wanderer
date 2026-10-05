@@ -20,7 +20,7 @@ class QuestBoard:
             print("\n-- Pub --")
             print("1) Check/Accept Quests")
             print("2) Turn In Active Quest")
-            print("3) Rest (10g) — fully heal")
+            print("3) Rest (10g) — fully recover")
             print("4) Abandon Active Quest")
             print("5) Ask about rumors (Main Story)")
             print("0) Leave")

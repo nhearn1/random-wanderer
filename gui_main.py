@@ -9,6 +9,7 @@ from exploration import Explorer
 
 from ui.components import Button
 from ui.character_creation import character_creation_screen
+from ui.class_selection import class_selection_screen
 from ui.town import town_screen
 from ui.stats import stats_screen
 from ui.inventory import inventory_screen
@@ -113,10 +114,6 @@ def title_screen(
 
     while True:
 
-        # ========================================================
-        # EVENTS
-        # ========================================================
-
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
@@ -135,10 +132,6 @@ def title_screen(
 
             if quit_button.clicked(event):
                 return "quit"
-
-        # ========================================================
-        # DRAW
-        # ========================================================
 
         screen.blit(
             background,
@@ -233,6 +226,10 @@ def main():
     # BACK should return to Town or Exploration.
     return_screen = "town"
 
+    # Used when Level 5 class selection interrupts another screen.
+    # After choosing a class, the player returns here.
+    class_return_screen = "town"
+
     running = True
 
     player = None
@@ -248,6 +245,35 @@ def main():
     # ============================================================
 
     while running:
+
+        # ========================================================
+        # PENDING CLASS SELECTION
+        # ========================================================
+
+        # gain_xp() sets class_selection_pending when a GUI player
+        # reaches Level 5. Catch that state before displaying the
+        # next normal game screen.
+        #
+        # Combat itself is allowed to finish first. This prevents
+        # the class-selection screen from interrupting an active
+        # encounter midway through combat.
+
+        if (
+            player is not None
+            and player.class_selection_pending
+            and current_screen not in (
+                "combat",
+                "class_selection",
+            )
+        ):
+
+            class_return_screen = (
+                current_screen
+            )
+
+            current_screen = (
+                "class_selection"
+            )
 
         # ========================================================
         # TITLE
@@ -391,6 +417,70 @@ def main():
                 running = False
 
         # ========================================================
+        # CLASS SELECTION
+        # ========================================================
+
+        elif current_screen == "class_selection":
+
+            if player is None:
+
+                current_screen = "title"
+                continue
+
+            result = class_selection_screen(
+                screen,
+                clock,
+                player,
+                menu_font,
+                small_font,
+            )
+
+            if result == "selected":
+
+                print(
+                    "\n"
+                    "=== ADVANCED CLASS SELECTED ==="
+                )
+
+                print(
+                    f"Role: {player.role}"
+                )
+
+                print(
+                    "HP: "
+                    f"{player.hp}/"
+                    f"{player.max_hp}"
+                )
+
+                print(
+                    f"ATK: {player.attack}"
+                )
+
+                print(
+                    f"DEF: {player.defense}"
+                )
+
+                print(
+                    "Resource: "
+                    f"{player.resource_type} "
+                    f"{player.resource}/"
+                    f"{player.max_resource}"
+                )
+
+                print(
+                    "Class Selection Pending: "
+                    f"{player.class_selection_pending}"
+                )
+
+                current_screen = (
+                    class_return_screen
+                )
+
+            elif result == "quit":
+
+                running = False
+
+        # ========================================================
         # TOWN
         # ========================================================
 
@@ -462,13 +552,6 @@ def main():
                 menu_font,
                 small_font,
             )
-
-            # Exploration normally returns a simple string.
-            # Monster encounters return:
-            #
-            #     ("combat", enemies)
-            #
-            # where enemies is the actual list of Enemy objects.
 
             if (
                 isinstance(result, tuple)
@@ -593,10 +676,6 @@ def main():
             # ----------------------------------------------------
 
             elif outcome == "lost":
-
-                # Preserve the original CLI exploration behavior:
-                # losing a wilderness fight returns the player to
-                # Town with 1 HP.
 
                 player.hp = 1
 

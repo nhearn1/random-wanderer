@@ -72,11 +72,8 @@ class Character:
         # ========================================================
 
         self.cooldowns = {}
-
-        # Generic status-effect container.
         self.status_effects = {}
 
-        # Existing temporary combat states.
         self.guard_active = False
         self.dodge_bonus = 0.0
 
@@ -186,7 +183,10 @@ class Character:
                 f"to {self.level}! ***"
             )
 
-        # Class selection
+        # --------------------------------------------------------
+        # CLASS SELECTION
+        # --------------------------------------------------------
+
         if (
             self.level >= 5
             and not self.class_selected
@@ -197,7 +197,10 @@ class Character:
             else:
                 self.choose_advanced_class()
 
-        # Subclass selection
+        # --------------------------------------------------------
+        # SUBCLASS SELECTION
+        # --------------------------------------------------------
+
         if (
             self.level >= 20
             and self.class_selected
@@ -206,12 +209,105 @@ class Character:
             self.choose_subclass()
 
     # ============================================================
-    # CLASS SELECTION
+    # CLASS APPLICATION
+    # ============================================================
+
+    def select_advanced_class(
+        self,
+        role
+    ):
+        """
+        Apply an advanced class.
+
+        This is the shared class-selection logic used by both
+        the CLI and graphical interfaces.
+
+        Returns True if the class was successfully selected.
+        """
+
+        # A class may only be selected once.
+        if self.class_selected:
+            return False
+
+        # Class selection is a level-5 feature.
+        if self.level < 5:
+            return False
+
+        valid_roles = {
+            "Warrior",
+            "Mage",
+            "Rogue",
+        }
+
+        if role not in valid_roles:
+            return False
+
+        # --------------------------------------------------------
+        # WARRIOR
+        # --------------------------------------------------------
+
+        if role == "Warrior":
+
+            self.role = "Warrior"
+
+            self.max_hp += 10
+            self.defense += 1
+
+            self.resource_type = "Energy"
+            self.max_resource = 100
+
+        # --------------------------------------------------------
+        # MAGE
+        # --------------------------------------------------------
+
+        elif role == "Mage":
+
+            self.role = "Mage"
+
+            self.max_hp -= 5
+            self.attack += 2
+
+            self.resource_type = "Mana"
+            self.max_resource = 100
+
+        # --------------------------------------------------------
+        # ROGUE
+        # --------------------------------------------------------
+
+        elif role == "Rogue":
+
+            self.role = "Rogue"
+
+            self.max_hp += 5
+            self.attack += 1
+
+            self.resource_type = "Energy"
+            self.max_resource = 100
+
+        # --------------------------------------------------------
+        # FINALIZE CLASS SELECTION
+        # --------------------------------------------------------
+
+        self.class_selected = True
+        self.class_selection_pending = False
+
+        self.resource = self.max_resource
+        self.hp = self.max_hp
+
+        return True
+
+    # ============================================================
+    # CLI CLASS SELECTION
     # ============================================================
 
     def choose_advanced_class(self):
+        """CLI advanced-class selection."""
+
         while True:
-            print("\n*** Choose Your Class ***")
+
+            print(
+                "\n*** Choose Your Class ***"
+            )
 
             print(
                 "1) Warrior — durable melee fighter"
@@ -228,58 +324,43 @@ class Character:
 
             choice = input("> ").strip()
 
-            if choice == "1":
-                self.role = "Warrior"
+            role_map = {
+                "1": "Warrior",
+                "2": "Mage",
+                "3": "Rogue",
+            }
 
-                self.max_hp += 10
-                self.defense += 1
+            role = role_map.get(
+                choice
+            )
 
-                self.resource_type = "Energy"
-                self.max_resource = 100
+            if role:
 
-                break
+                if self.select_advanced_class(
+                    role
+                ):
 
-            elif choice == "2":
-                self.role = "Mage"
+                    print(
+                        f"\n*** You are now a "
+                        f"{self.role}! ***"
+                    )
 
-                self.max_hp -= 5
-                self.attack += 2
+                    return
 
-                self.resource_type = "Mana"
-                self.max_resource = 100
-
-                break
-
-            elif choice == "3":
-                self.role = "Rogue"
-
-                self.max_hp += 5
-                self.attack += 1
-
-                self.resource_type = "Energy"
-                self.max_resource = 100
-
-                break
-
-            else:
-                print("Invalid choice.")
-
-        self.class_selected = True
-
-        self.resource = self.max_resource
-        self.hp = self.max_hp
-
-        print(
-            f"\n*** You are now a "
-            f"{self.role}! ***"
-        )
+            print(
+                "Invalid choice."
+            )
 
     # ============================================================
     # SUBCLASS SELECTION
     # ============================================================
 
     def choose_subclass(self):
-        # Placeholder until the Lv20 subclass system is implemented.
+        """
+        Placeholder until the Lv20 subclass system
+        is implemented.
+        """
+
         print(
             "(subclass selection occurs here "
             "in your full build)"

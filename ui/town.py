@@ -11,7 +11,12 @@ from ui.components import Button
 # PATHS
 # ============================================================
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = (
+    Path(__file__)
+    .resolve()
+    .parent
+    .parent
+)
 
 TOWN_BACKGROUND_PATH = (
     PROJECT_ROOT
@@ -38,12 +43,16 @@ def load_town_background(size):
     """Load and scale the town background."""
 
     if not TOWN_BACKGROUND_PATH.exists():
+
         raise FileNotFoundError(
-            f"Town background not found:\n{TOWN_BACKGROUND_PATH}"
+            "Town background not found:\n"
+            f"{TOWN_BACKGROUND_PATH}"
         )
 
     background = pygame.image.load(
-        str(TOWN_BACKGROUND_PATH)
+        str(
+            TOWN_BACKGROUND_PATH
+        )
     ).convert()
 
     return pygame.transform.smoothscale(
@@ -69,7 +78,9 @@ def draw_player_panel(
         pygame.SRCALPHA,
     )
 
-    panel.fill(PANEL_BLUE)
+    panel.fill(
+        PANEL_BLUE
+    )
 
     pygame.draw.rect(
         panel,
@@ -85,13 +96,20 @@ def draw_player_panel(
     )
 
     role_text = small_font.render(
-        f"Level {player.level} {player.role}",
+        (
+            f"Level {player.level} "
+            f"{player.role}"
+        ),
         True,
         WHITE,
     )
 
     hp_text = small_font.render(
-        f"HP: {player.hp}/{player.max_hp}",
+        (
+            f"HP: "
+            f"{player.hp}/"
+            f"{player.max_hp}"
+        ),
         True,
         WHITE,
     )
@@ -102,12 +120,30 @@ def draw_player_panel(
         WHITE,
     )
 
-    panel.blit(name_text, (20, 15))
-    panel.blit(role_text, (20, 55))
-    panel.blit(hp_text, (20, 85))
-    panel.blit(gold_text, (20, 110))
+    panel.blit(
+        name_text,
+        (20, 15),
+    )
 
-    screen.blit(panel, (25, 25))
+    panel.blit(
+        role_text,
+        (20, 55),
+    )
+
+    panel.blit(
+        hp_text,
+        (20, 85),
+    )
+
+    panel.blit(
+        gold_text,
+        (20, 110),
+    )
+
+    screen.blit(
+        panel,
+        (25, 25),
+    )
 
 
 # ============================================================
@@ -123,15 +159,15 @@ def town_screen(
 ):
     """Display the graphical town hub."""
 
-    background = load_town_background(
-        screen.get_size()
+    background = (
+        load_town_background(
+            screen.get_size()
+        )
     )
 
-    screen_width, screen_height = screen.get_size()
-
-    # ========================================================
-    # STANDARD LOCATION BUTTON SIZE
-    # ========================================================
+    screen_width, screen_height = (
+        screen.get_size()
+    )
 
     button_width = 220
     button_height = 55
@@ -143,7 +179,9 @@ def town_screen(
     pub_button = Button(
         "PUB",
         60,
-        int(screen_height * 0.34),
+        int(
+            screen_height * 0.34
+        ),
         button_width,
         button_height,
         font,
@@ -151,8 +189,14 @@ def town_screen(
 
     general_shop_button = Button(
         "GENERAL SHOP",
-        screen_width - button_width - 60,
-        int(screen_height * 0.34),
+        (
+            screen_width
+            - button_width
+            - 60
+        ),
+        int(
+            screen_height * 0.34
+        ),
         button_width,
         button_height,
         font,
@@ -161,7 +205,9 @@ def town_screen(
     workshop_button = Button(
         "WORKSHOP",
         60,
-        int(screen_height * 0.57),
+        int(
+            screen_height * 0.57
+        ),
         button_width,
         button_height,
         font,
@@ -169,8 +215,14 @@ def town_screen(
 
     equipment_shop_button = Button(
         "EQUIPMENT",
-        screen_width - button_width - 60,
-        int(screen_height * 0.57),
+        (
+            screen_width
+            - button_width
+            - 60
+        ),
+        int(
+            screen_height * 0.57
+        ),
         button_width,
         button_height,
         font,
@@ -178,16 +230,45 @@ def town_screen(
 
     quest_button = Button(
         "QUEST BOARD",
-        (screen_width - button_width) // 2,
+        (
+            screen_width
+            - button_width
+        ) // 2,
         110,
         button_width,
         button_height,
         font,
     )
 
+    guild_unlocked = (
+        player.level >= 5
+        and player.main_story_unlocked
+    )
+
+    guild_label = (
+        "GUILD HALL"
+        if guild_unlocked
+        else "GUILD HALL - LOCKED"
+    )
+
+    guild_button = Button(
+        guild_label,
+        (
+            screen_width
+            - 280
+        ) // 2,
+        285,
+        280,
+        button_height,
+        small_font,
+    )
+
     explore_button = Button(
         "EXPLORE",
-        (screen_width - button_width) // 2,
+        (
+            screen_width
+            - button_width
+        ) // 2,
         screen_height - 105,
         button_width,
         button_height,
@@ -222,6 +303,7 @@ def town_screen(
         workshop_button,
         equipment_shop_button,
         quest_button,
+        guild_button,
         explore_button,
         inventory_button,
         stats_button,
@@ -233,10 +315,6 @@ def town_screen(
 
     while True:
 
-        # ====================================================
-        # EVENTS
-        # ====================================================
-
         for event in pygame.event.get():
 
             if event.type == pygame.QUIT:
@@ -247,36 +325,51 @@ def town_screen(
                 if event.key == pygame.K_ESCAPE:
                     return "title"
 
-            # ------------------------------------------------
-            # LOCATION BUTTONS
-            # ------------------------------------------------
-
-            if pub_button.clicked(event):
+            if pub_button.clicked(
+                event
+            ):
                 return "pub"
 
-            if general_shop_button.clicked(event):
+            if general_shop_button.clicked(
+                event
+            ):
                 return "general_shop"
 
-            if workshop_button.clicked(event):
+            if workshop_button.clicked(
+                event
+            ):
                 return "workshop"
 
-            if equipment_shop_button.clicked(event):
+            if equipment_shop_button.clicked(
+                event
+            ):
                 return "equipment_shop"
 
-            if quest_button.clicked(event):
+            if quest_button.clicked(
+                event
+            ):
                 return "quests"
 
-            if explore_button.clicked(event):
+            if guild_button.clicked(
+                event
+            ):
+
+                if guild_unlocked:
+                    return "guild_hall"
+
+            if explore_button.clicked(
+                event
+            ):
                 return "explore"
 
-            # ------------------------------------------------
-            # PLAYER BUTTONS
-            # ------------------------------------------------
-
-            if inventory_button.clicked(event):
+            if inventory_button.clicked(
+                event
+            ):
                 return "inventory"
 
-            if stats_button.clicked(event):
+            if stats_button.clicked(
+                event
+            ):
                 return "stats"
 
         # ====================================================
@@ -288,7 +381,6 @@ def town_screen(
             (0, 0),
         )
 
-        # Slight overlay so UI elements remain readable.
         overlay = pygame.Surface(
             screen.get_size(),
             pygame.SRCALPHA,
@@ -319,11 +411,10 @@ def town_screen(
         # ====================================================
 
         for button in buttons:
-            button.draw(screen)
 
-        # ====================================================
-        # DISPLAY
-        # ====================================================
+            button.draw(
+                screen
+            )
 
         pygame.display.flip()
         clock.tick(60)

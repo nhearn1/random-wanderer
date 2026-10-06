@@ -7,6 +7,7 @@ from character import Character
 from inventory import Inventory
 from exploration import Explorer
 from quests import QuestBoard
+from story import Story
 
 from ui.components import Button
 from ui.character_creation import character_creation_screen
@@ -21,6 +22,7 @@ from ui.equipment import equipment_screen
 from ui.workshop import workshop_screen
 from ui.quests import quest_board_screen
 from ui.pub import pub_screen
+from ui.story import guild_hall_screen
 
 
 # ================================================================
@@ -62,6 +64,7 @@ def load_title_background():
     if not os.path.exists(
         TITLE_BACKGROUND_PATH
     ):
+
         raise FileNotFoundError(
             "Title background not found:\n"
             f"{TITLE_BACKGROUND_PATH}"
@@ -91,13 +94,14 @@ def title_screen(
     menu_font,
     small_font,
 ):
-    """Display the Random Wanderer title screen."""
+    """Display the title screen."""
 
     button_width = 360
     button_height = 58
 
     button_x = (
-        SCREEN_WIDTH - button_width
+        SCREEN_WIDTH
+        - button_width
     ) // 2
 
     begin_button = Button(
@@ -133,10 +137,14 @@ def title_screen(
                 if event.key == pygame.K_RETURN:
                     return "start"
 
-            if begin_button.clicked(event):
+            if begin_button.clicked(
+                event
+            ):
                 return "start"
 
-            if quit_button.clicked(event):
+            if quit_button.clicked(
+                event
+            ):
                 return "quit"
 
         screen.blit(
@@ -156,13 +164,21 @@ def title_screen(
         screen.blit(
             panel,
             (
-                (SCREEN_WIDTH - 420) // 2,
+                (
+                    SCREEN_WIDTH
+                    - 420
+                ) // 2,
                 445,
             ),
         )
 
-        begin_button.draw(screen)
-        quit_button.draw(screen)
+        begin_button.draw(
+            screen
+        )
+
+        quit_button.draw(
+            screen
+        )
 
         hint = small_font.render(
             "ENTER: Begin    ESC: Quit",
@@ -170,10 +186,12 @@ def title_screen(
             TEXT,
         )
 
-        hint_rect = hint.get_rect(
-            center=(
-                SCREEN_WIDTH // 2,
-                640,
+        hint_rect = (
+            hint.get_rect(
+                center=(
+                    SCREEN_WIDTH // 2,
+                    640,
+                )
             )
         )
 
@@ -183,7 +201,10 @@ def title_screen(
         )
 
         pygame.display.flip()
-        clock.tick(FPS)
+
+        clock.tick(
+            FPS
+        )
 
 
 # ================================================================
@@ -191,7 +212,7 @@ def title_screen(
 # ================================================================
 
 def main():
-    """Run the graphical version of Random Wanderer."""
+    """Run Random Wanderer GUI."""
 
     pygame.init()
 
@@ -229,7 +250,6 @@ def main():
     current_screen = "title"
 
     return_screen = "town"
-
     class_return_screen = "town"
 
     running = True
@@ -238,8 +258,12 @@ def main():
     inventory = None
     explorer = None
     quest_board = None
+    story = None
 
     active_enemies = None
+
+    combat_origin = None
+    story_combat_type = None
 
     # ============================================================
     # MAIN APPLICATION LOOP
@@ -309,7 +333,9 @@ def main():
 
             if result == "back":
 
-                current_screen = "title"
+                current_screen = (
+                    "title"
+                )
 
             elif result == "start":
 
@@ -338,7 +364,15 @@ def main():
                     inventory,
                 )
 
+                story = Story(
+                    player,
+                    inventory,
+                    explorer,
+                )
+
                 active_enemies = None
+                combat_origin = None
+                story_combat_type = None
 
                 print(
                     "\n"
@@ -382,11 +416,6 @@ def main():
                 )
 
                 print(
-                    "Class Selection Pending: "
-                    f"{player.class_selection_pending}"
-                )
-
-                print(
                     "Inventory Created: "
                     f"{inventory is not None}"
                 )
@@ -401,7 +430,14 @@ def main():
                     f"{quest_board is not None}"
                 )
 
-                current_screen = "town"
+                print(
+                    "Story Created: "
+                    f"{story is not None}"
+                )
+
+                current_screen = (
+                    "town"
+                )
 
             elif result == "quit":
 
@@ -415,22 +451,28 @@ def main():
 
             if player is None:
 
-                current_screen = "title"
+                current_screen = (
+                    "title"
+                )
+
                 continue
 
-            result = class_selection_screen(
-                screen,
-                clock,
-                player,
-                menu_font,
-                small_font,
+            result = (
+                class_selection_screen(
+                    screen,
+                    clock,
+                    player,
+                    menu_font,
+                    small_font,
+                )
             )
 
             if result == "selected":
 
                 print(
                     "\n"
-                    "=== ADVANCED CLASS SELECTED ==="
+                    "=== ADVANCED CLASS "
+                    "SELECTED ==="
                 )
 
                 print(
@@ -458,11 +500,6 @@ def main():
                     f"{player.max_resource}"
                 )
 
-                print(
-                    "Class Selection Pending: "
-                    f"{player.class_selection_pending}"
-                )
-
                 current_screen = (
                     class_return_screen
                 )
@@ -479,7 +516,10 @@ def main():
 
             if player is None:
 
-                current_screen = "title"
+                current_screen = (
+                    "title"
+                )
+
                 continue
 
             result = town_screen(
@@ -492,7 +532,9 @@ def main():
 
             if result == "title":
 
-                current_screen = "title"
+                current_screen = (
+                    "title"
+                )
 
             elif result == "quit":
 
@@ -500,43 +542,64 @@ def main():
 
             elif result == "stats":
 
-                return_screen = "town"
-                current_screen = "stats"
+                return_screen = (
+                    "town"
+                )
+
+                current_screen = (
+                    "stats"
+                )
 
             elif result == "inventory":
 
-                return_screen = "town"
-                current_screen = "inventory"
+                return_screen = (
+                    "town"
+                )
+
+                current_screen = (
+                    "inventory"
+                )
 
             elif result == "explore":
 
-                current_screen = "exploration"
+                current_screen = (
+                    "exploration"
+                )
 
             elif result == "general_shop":
 
-                current_screen = "shop"
+                current_screen = (
+                    "shop"
+                )
 
             elif result == "equipment_shop":
 
-                current_screen = "equipment"
+                current_screen = (
+                    "equipment"
+                )
 
             elif result == "workshop":
 
-                current_screen = "workshop"
+                current_screen = (
+                    "workshop"
+                )
 
             elif result == "quests":
 
-                current_screen = "quests"
+                current_screen = (
+                    "quests"
+                )
 
             elif result == "pub":
 
-                current_screen = "pub"
+                current_screen = (
+                    "pub"
+                )
 
-            else:
+            elif result == "guild_hall":
 
-                print(
-                    "Town destination selected: "
-                    f"{result}"
+                current_screen = (
+                    "guild_hall"
                 )
 
         # ========================================================
@@ -550,7 +613,10 @@ def main():
                 or inventory is None
             ):
 
-                current_screen = "title"
+                current_screen = (
+                    "title"
+                )
+
                 continue
 
             result = shop_screen(
@@ -568,7 +634,9 @@ def main():
 
             else:
 
-                current_screen = "town"
+                current_screen = (
+                    "town"
+                )
 
         # ========================================================
         # EQUIPMENT
@@ -578,7 +646,10 @@ def main():
 
             if player is None:
 
-                current_screen = "title"
+                current_screen = (
+                    "title"
+                )
+
                 continue
 
             result = equipment_screen(
@@ -595,7 +666,9 @@ def main():
 
             else:
 
-                current_screen = "town"
+                current_screen = (
+                    "town"
+                )
 
         # ========================================================
         # WORKSHOP
@@ -608,7 +681,10 @@ def main():
                 or inventory is None
             ):
 
-                current_screen = "title"
+                current_screen = (
+                    "title"
+                )
+
                 continue
 
             result = workshop_screen(
@@ -626,7 +702,9 @@ def main():
 
             else:
 
-                current_screen = "town"
+                current_screen = (
+                    "town"
+                )
 
         # ========================================================
         # QUEST BOARD
@@ -640,7 +718,10 @@ def main():
                 or quest_board is None
             ):
 
-                current_screen = "title"
+                current_screen = (
+                    "title"
+                )
+
                 continue
 
             result = quest_board_screen(
@@ -658,7 +739,9 @@ def main():
 
             else:
 
-                current_screen = "town"
+                current_screen = (
+                    "town"
+                )
 
         # ========================================================
         # PUB
@@ -671,7 +754,10 @@ def main():
                 or quest_board is None
             ):
 
-                current_screen = "title"
+                current_screen = (
+                    "title"
+                )
+
                 continue
 
             result = pub_screen(
@@ -689,7 +775,71 @@ def main():
 
             else:
 
-                current_screen = "town"
+                current_screen = (
+                    "town"
+                )
+
+        # ========================================================
+        # GUILD HALL
+        # ========================================================
+
+        elif current_screen == "guild_hall":
+
+            if (
+                player is None
+                or story is None
+            ):
+
+                current_screen = (
+                    "title"
+                )
+
+                continue
+
+            result = guild_hall_screen(
+                screen,
+                clock,
+                player,
+                story,
+                menu_font,
+                small_font,
+            )
+
+            if result == "quit":
+
+                running = False
+
+            elif result == "town":
+
+                current_screen = (
+                    "town"
+                )
+
+            elif (
+                isinstance(
+                    result,
+                    tuple,
+                )
+                and len(result) == 3
+                and result[0]
+                == "story_combat"
+            ):
+
+                active_enemies = (
+                    result[1]
+                )
+
+                story_combat_type = (
+                    result[2]
+                )
+
+                combat_origin = (
+                    "story"
+                )
+
+                current_screen = (
+                    "combat"
+                )
 
         # ========================================================
         # EXPLORATION
@@ -703,7 +853,10 @@ def main():
                 or explorer is None
             ):
 
-                current_screen = "title"
+                current_screen = (
+                    "title"
+                )
+
                 continue
 
             result = exploration_screen(
@@ -717,28 +870,56 @@ def main():
             )
 
             if (
-                isinstance(result, tuple)
+                isinstance(
+                    result,
+                    tuple,
+                )
                 and len(result) == 2
-                and result[0] == "combat"
+                and result[0]
+                == "combat"
             ):
 
-                active_enemies = result[1]
+                active_enemies = (
+                    result[1]
+                )
 
-                current_screen = "combat"
+                combat_origin = (
+                    "exploration"
+                )
+
+                story_combat_type = (
+                    None
+                )
+
+                current_screen = (
+                    "combat"
+                )
 
             elif result == "town":
 
-                current_screen = "town"
+                current_screen = (
+                    "town"
+                )
 
             elif result == "inventory":
 
-                return_screen = "exploration"
-                current_screen = "inventory"
+                return_screen = (
+                    "exploration"
+                )
+
+                current_screen = (
+                    "inventory"
+                )
 
             elif result == "stats":
 
-                return_screen = "exploration"
-                current_screen = "stats"
+                return_screen = (
+                    "exploration"
+                )
+
+                current_screen = (
+                    "stats"
+                )
 
             elif result == "quit":
 
@@ -758,7 +939,13 @@ def main():
             ):
 
                 active_enemies = None
-                current_screen = "exploration"
+                combat_origin = None
+                story_combat_type = None
+
+                current_screen = (
+                    "town"
+                )
+
                 continue
 
             combat_result = combat_screen(
@@ -771,8 +958,10 @@ def main():
                 small_font,
             )
 
-            outcome = combat_result.get(
-                "outcome"
+            outcome = (
+                combat_result.get(
+                    "outcome"
+                )
             )
 
             combat_enemies = (
@@ -782,53 +971,121 @@ def main():
                 )
             )
 
+            # ----------------------------------------------------
+            # VICTORY
+            # ----------------------------------------------------
+
             if outcome == "won":
 
-                rewards = (
-                    explorer.award_victory_rewards(
-                        combat_enemies
+                if (
+                    combat_origin
+                    == "story"
+                ):
+
+                    defeated_enemy = (
+                        combat_enemies[0]
                     )
-                )
 
-                print(
-                    "\n=== COMBAT VICTORY ==="
-                )
+                    if (
+                        story_combat_type
+                        == "kaelen"
+                    ):
 
-                print(
-                    "Gold earned: "
-                    f"{rewards['gold']}"
-                )
+                        result = (
+                            story
+                            .complete_kaelen_duel(
+                                defeated_enemy
+                            )
+                        )
 
-                if rewards["drops"]:
+                    else:
+
+                        result = (
+                            story
+                            .complete_current_boss(
+                                defeated_enemy
+                            )
+                        )
 
                     print(
-                        "Drops: "
-                        + ", ".join(
-                            rewards["drops"]
-                        )
+                        "\n"
+                        "=== STORY VICTORY ==="
+                    )
+
+                    print(
+                        result["message"]
+                    )
+
+                    print(
+                        "Gold earned: "
+                        f"{result.get('gold', 0)}"
+                    )
+
+                    active_enemies = None
+                    combat_origin = None
+                    story_combat_type = None
+
+                    current_screen = (
+                        "guild_hall"
                     )
 
                 else:
 
-                    print(
-                        "Drops: None"
+                    rewards = (
+                        explorer
+                        .award_victory_rewards(
+                            combat_enemies
+                        )
                     )
 
-                print(
-                    "Player gold: "
-                    f"{player.gold}"
-                )
+                    print(
+                        "\n"
+                        "=== COMBAT VICTORY ==="
+                    )
 
-                print(
-                    "Player XP: "
-                    f"{player.xp}"
-                )
+                    print(
+                        "Gold earned: "
+                        f"{rewards['gold']}"
+                    )
 
-                active_enemies = None
+                    if rewards["drops"]:
 
-                current_screen = (
-                    "exploration"
-                )
+                        print(
+                            "Drops: "
+                            + ", ".join(
+                                rewards[
+                                    "drops"
+                                ]
+                            )
+                        )
+
+                    else:
+
+                        print(
+                            "Drops: None"
+                        )
+
+                    print(
+                        "Player gold: "
+                        f"{player.gold}"
+                    )
+
+                    print(
+                        "Player XP: "
+                        f"{player.xp}"
+                    )
+
+                    active_enemies = None
+                    combat_origin = None
+                    story_combat_type = None
+
+                    current_screen = (
+                        "exploration"
+                    )
+
+            # ----------------------------------------------------
+            # DEFEAT
+            # ----------------------------------------------------
 
             elif outcome == "lost":
 
@@ -837,6 +1094,8 @@ def main():
                 explorer.reset_exploration_state()
 
                 active_enemies = None
+                combat_origin = None
+                story_combat_type = None
 
                 print(
                     "\n"
@@ -844,20 +1103,43 @@ def main():
                     "with 1 HP..."
                 )
 
-                current_screen = "town"
+                current_screen = (
+                    "town"
+                )
+
+            # ----------------------------------------------------
+            # FLED
+            # ----------------------------------------------------
 
             elif outcome == "fled":
 
+                previous_origin = (
+                    combat_origin
+                )
+
                 active_enemies = None
+                combat_origin = None
+                story_combat_type = None
 
                 print(
                     "\n"
                     "You escaped the encounter."
                 )
 
-                current_screen = (
-                    "exploration"
-                )
+                if (
+                    previous_origin
+                    == "story"
+                ):
+
+                    current_screen = (
+                        "guild_hall"
+                    )
+
+                else:
+
+                    current_screen = (
+                        "exploration"
+                    )
 
             elif outcome == "quit":
 
@@ -865,15 +1147,12 @@ def main():
 
             else:
 
-                print(
-                    "Unknown combat outcome: "
-                    f"{outcome}"
-                )
-
                 active_enemies = None
+                combat_origin = None
+                story_combat_type = None
 
                 current_screen = (
-                    "exploration"
+                    "town"
                 )
 
         # ========================================================
@@ -884,7 +1163,10 @@ def main():
 
             if player is None:
 
-                current_screen = "title"
+                current_screen = (
+                    "title"
+                )
+
                 continue
 
             result = stats_screen(
@@ -905,7 +1187,9 @@ def main():
                 "exploration",
             ):
 
-                current_screen = result
+                current_screen = (
+                    result
+                )
 
             else:
 
@@ -924,7 +1208,10 @@ def main():
                 or inventory is None
             ):
 
-                current_screen = "title"
+                current_screen = (
+                    "title"
+                )
+
                 continue
 
             result = inventory_screen(
@@ -946,7 +1233,9 @@ def main():
                 "exploration",
             ):
 
-                current_screen = result
+                current_screen = (
+                    result
+                )
 
             else:
 
@@ -955,7 +1244,7 @@ def main():
                 )
 
         # ========================================================
-        # UNKNOWN STATE SAFETY
+        # UNKNOWN STATE
         # ========================================================
 
         else:
@@ -965,7 +1254,9 @@ def main():
                 f"{current_screen}"
             )
 
-            current_screen = "title"
+            current_screen = (
+                "title"
+            )
 
     pygame.quit()
     sys.exit()

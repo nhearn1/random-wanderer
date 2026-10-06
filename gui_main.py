@@ -6,6 +6,7 @@ import pygame
 from character import Character
 from inventory import Inventory
 from exploration import Explorer
+from quests import QuestBoard
 
 from ui.components import Button
 from ui.character_creation import character_creation_screen
@@ -18,6 +19,7 @@ from ui.combat import combat_screen
 from ui.shop import shop_screen
 from ui.equipment import equipment_screen
 from ui.workshop import workshop_screen
+from ui.quests import quest_board_screen
 
 
 # ================================================================
@@ -234,6 +236,7 @@ def main():
     player = None
     inventory = None
     explorer = None
+    quest_board = None
 
     active_enemies = None
 
@@ -329,6 +332,11 @@ def main():
                     inventory,
                 )
 
+                quest_board = QuestBoard(
+                    player,
+                    inventory,
+                )
+
                 active_enemies = None
 
                 print(
@@ -385,6 +393,11 @@ def main():
                 print(
                     "Explorer Created: "
                     f"{explorer is not None}"
+                )
+
+                print(
+                    "Quest Board Created: "
+                    f"{quest_board is not None}"
                 )
 
                 current_screen = "town"
@@ -510,6 +523,10 @@ def main():
 
                 current_screen = "workshop"
 
+            elif result == "quests":
+
+                current_screen = "quests"
+
             else:
 
                 print(
@@ -594,6 +611,38 @@ def main():
                 clock,
                 player,
                 inventory,
+                menu_font,
+                small_font,
+            )
+
+            if result == "quit":
+
+                running = False
+
+            else:
+
+                current_screen = "town"
+
+        # ========================================================
+        # QUEST BOARD
+        # ========================================================
+
+        elif current_screen == "quests":
+
+            if (
+                player is None
+                or inventory is None
+                or quest_board is None
+            ):
+
+                current_screen = "title"
+                continue
+
+            result = quest_board_screen(
+                screen,
+                clock,
+                player,
+                quest_board,
                 menu_font,
                 small_font,
             )

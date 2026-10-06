@@ -16,6 +16,7 @@ from ui.inventory import inventory_screen
 from ui.exploration import exploration_screen
 from ui.combat import combat_screen
 from ui.shop import shop_screen
+from ui.equipment import equipment_screen
 
 
 # ================================================================
@@ -500,6 +501,10 @@ def main():
 
                 current_screen = "shop"
 
+            elif result == "equipment_shop":
+
+                current_screen = "equipment"
+
             else:
 
                 print(
@@ -526,6 +531,33 @@ def main():
                 clock,
                 player,
                 inventory,
+                menu_font,
+                small_font,
+            )
+
+            if result == "quit":
+
+                running = False
+
+            else:
+
+                current_screen = "town"
+
+        # ========================================================
+        # EQUIPMENT
+        # ========================================================
+
+        elif current_screen == "equipment":
+
+            if player is None:
+
+                current_screen = "title"
+                continue
+
+            result = equipment_screen(
+                screen,
+                clock,
+                player,
                 menu_font,
                 small_font,
             )

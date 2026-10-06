@@ -20,6 +20,7 @@ from ui.shop import shop_screen
 from ui.equipment import equipment_screen
 from ui.workshop import workshop_screen
 from ui.quests import quest_board_screen
+from ui.pub import pub_screen
 
 
 # ================================================================
@@ -527,6 +528,10 @@ def main():
 
                 current_screen = "quests"
 
+            elif result == "pub":
+
+                current_screen = "pub"
+
             else:
 
                 print(
@@ -639,6 +644,37 @@ def main():
                 continue
 
             result = quest_board_screen(
+                screen,
+                clock,
+                player,
+                quest_board,
+                menu_font,
+                small_font,
+            )
+
+            if result == "quit":
+
+                running = False
+
+            else:
+
+                current_screen = "town"
+
+        # ========================================================
+        # PUB
+        # ========================================================
+
+        elif current_screen == "pub":
+
+            if (
+                player is None
+                or quest_board is None
+            ):
+
+                current_screen = "title"
+                continue
+
+            result = pub_screen(
                 screen,
                 clock,
                 player,

@@ -67,9 +67,6 @@ class QuestBoard:
     def get_available_quests(self):
         """
         Return all quests currently accessible to the player.
-
-        Availability is based on whether the required monster drop
-        can be obtained in a region unlocked by story progression.
         """
 
         return [
@@ -89,11 +86,7 @@ class QuestBoard:
         self,
         quest=None,
     ):
-        """
-        Return inventory progress toward a quest.
-
-        If no quest is supplied, use the active quest.
-        """
+        """Return inventory progress toward a quest."""
 
         if quest is None:
             quest = self.active
@@ -132,12 +125,7 @@ class QuestBoard:
         self,
         quest,
     ):
-        """
-        Attempt to accept a quest.
-
-        Returns a result dictionary and does not request terminal
-        input.
-        """
+        """Attempt to accept a quest."""
 
         if self.active is not None:
 
@@ -181,11 +169,7 @@ class QuestBoard:
         }
 
     def abandon_active(self):
-        """
-        Abandon the active quest.
-
-        Collected items remain in inventory.
-        """
+        """Abandon the active quest."""
 
         if self.active is None:
 
@@ -231,12 +215,7 @@ class QuestBoard:
         )
 
     def turn_in_active(self):
-        """
-        Complete the active quest if requirements are met.
-
-        Required items are removed, XP and gold are awarded,
-        and the active quest is cleared.
-        """
+        """Complete the active quest if requirements are met."""
 
         if self.active is None:
 
@@ -280,8 +259,6 @@ class QuestBoard:
             completed_quest["gold"]
         )
 
-        # Clear before gain_xp in case leveling triggers
-        # another GUI state such as class selection.
         self.active = None
 
         self.player.gain_xp(
@@ -312,10 +289,7 @@ class QuestBoard:
         self,
         quest,
     ):
-        """
-        Determine whether the quest's required drops can currently
-        be obtained from an unlocked region.
-        """
+        """Check whether required drops are currently obtainable."""
 
         for item in quest["need"]:
 
@@ -356,6 +330,112 @@ class QuestBoard:
                         return True
 
         return False
+
+    # ============================================================
+    # GUI-SAFE PUB ACTIONS
+    # ============================================================
+
+    def rest_at_pub(self):
+        """
+        Rest at the Pub for 10 gold.
+
+        Fully restores HP and, after class selection,
+        the player's class resource.
+        """
+
+        if self.player.gold < 10:
+
+            return {
+                "success": False,
+                "message": (
+                    "You don't have enough "
+                    "gold to rent a room."
+                ),
+            }
+
+        self.player.gold -= 10
+
+        self.player.hp = (
+            self.player.max_hp
+        )
+
+        if self.player.resource_type:
+
+            self.player.resource = (
+                self.player.max_resource
+            )
+
+        if self.player.resource_type:
+
+            message = (
+                "You rest for the night. "
+                "HP and "
+                f"{self.player.resource_type} "
+                "fully restored."
+            )
+
+        else:
+
+            message = (
+                "You rest for the night. "
+                "HP fully restored."
+            )
+
+        return {
+            "success": True,
+            "message": message,
+        }
+
+    def ask_about_rumors(self):
+        """
+        Ask the Pub Owner about the main story.
+
+        Level 5 is required before the main story can be unlocked.
+        """
+
+        if self.player.main_story_unlocked:
+
+            return {
+                "success": True,
+                "unlocked": True,
+                "speaker": "Pub Owner",
+                "message": (
+                    "You've already got the "
+                    "Guild Hall's attention. "
+                    "Follow up there."
+                ),
+            }
+
+        if self.player.level < 5:
+
+            return {
+                "success": False,
+                "unlocked": False,
+                "speaker": "Pub Owner",
+                "message": (
+                    "You're green yet. Come "
+                    "back when you've seen a "
+                    "bit more of the world. "
+                    "(Requires Level 5.)"
+                ),
+            }
+
+        self.player.main_story_unlocked = (
+            True
+        )
+
+        return {
+            "success": True,
+            "unlocked": True,
+            "speaker": "Pub Owner",
+            "message": (
+                "Word is the Guild Hall is "
+                "looking for capable sorts. "
+                "Something big's stirring out "
+                "in the Woods. If you're "
+                "willing, they'll brief you."
+            ),
+        }
 
     # ============================================================
     # CLI DISPLAY HELPERS
@@ -507,115 +587,46 @@ class QuestBoard:
             )
 
     # ============================================================
-    # PUB / MAIN STORY
+    # CLI PUB COMPATIBILITY
     # ============================================================
 
     def unlock_main_story(self):
-        """
-        Unlock the main story through the Pub.
+        """CLI wrapper for the Pub rumor system."""
 
-        Kept here for compatibility with the existing CLI.
-        """
+        result = (
+            self.ask_about_rumors()
+        )
+
+        print(
+            "\n["
+            f"{result['speaker']}"
+            "] "
+            f"{result['message']}"
+        )
 
         if (
-            self.player.main_story_unlocked
+            result["success"]
+            and result["unlocked"]
+            and self.player.level >= 5
         ):
 
             print(
-                'Pub Owner: "You\'ve already '
-                "got the Guild Hall's "
-                'attention. Follow up there."'
+                "*** Main Story Unlocked! "
+                "Visit the Guild Hall in town. ***"
             )
-
-            return
-
-        if self.player.level < 5:
-
-            print(
-                'Pub Owner: "You\'re green '
-                "yet. Come back when you've "
-                "seen a bit more of the world "
-                '(Lv 5)."'
-            )
-
-            return
-
-        print(
-            "\n[Pub Owner] "
-            '"Word is the Guild Hall is '
-            "looking for capable sorts."
-        )
-
-        print(
-            "Something big's stirring out "
-            "in the Woods. If you're willing, "
-            'they\'ll brief you."'
-        )
-
-        self.player.main_story_unlocked = (
-            True
-        )
-
-        # Keep story_stage at 0.
-        # The Guild Hall begins Act I.
-
-        print(
-            "*** Main Story Unlocked! "
-            "Visit the Guild Hall in town. ***"
-        )
-
-    # ============================================================
-    # PUB REST
-    # ============================================================
 
     def rest(self):
-        """
-        Fully restore HP and class resources for 10 gold.
+        """CLI wrapper for resting at the Pub."""
 
-        This method remains compatible with the existing CLI.
-        """
-
-        if self.player.gold < 10:
-
-            print(
-                "You don't have enough "
-                "gold to rest."
-            )
-
-            return False
-
-        self.player.gold -= 10
-
-        self.player.hp = (
-            self.player.max_hp
-        )
-
-        if self.player.resource_type:
-
-            self.player.resource = (
-                self.player.max_resource
-            )
-
-        print(
-            "You rent a room and rest."
+        result = (
+            self.rest_at_pub()
         )
 
         print(
-            "HP fully restored!"
+            result["message"]
         )
 
-        if self.player.resource_type:
-
-            print(
-                f"{self.player.resource_type} "
-                "fully restored!"
-            )
-
-        return True
-
-    # ============================================================
-    # CLI PUB MENU
-    # ============================================================
+        return result["success"]
 
     def pub_menu(self):
         """Display the existing CLI Pub menu."""
